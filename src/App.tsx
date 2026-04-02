@@ -20,13 +20,16 @@ const SignupPage = lazy(() =>
     .then((m) => resolveRemoteDefault(m, ['SignupPage', 'SignupPageHost', 'AuthApp']))
 )
 
+const UserMenu = lazy(() =>
+  import('auth/UserMenu')
+    .then((m) => ({ default: m.UserMenu ?? m.default }))
+)
+
 const ProductsPage = lazy(async () => {
   const [pageModule, adapterModule] = await Promise.allSettled([
     import('products/ProductsPage'),
     import('products/NuqsAdapter').catch(() => undefined),
   ])
-
-  
 
   const page = pageModule.status === 'fulfilled' ? pageModule.value : null
   const adapter = adapterModule && adapterModule.status === 'fulfilled' ? adapterModule.value : null
@@ -34,7 +37,6 @@ const ProductsPage = lazy(async () => {
   const resolved = resolveRemoteDefault(page ?? {}, ['ProductsPage', 'ProductsPageHost', 'ProductsApp'])
   const Component = resolved.default
 
-  // Prefer the host's NuqsAdapter (ensures adapter context comes from host-installed nuqs)
   const Adapter = HostNuqsAdapter ?? adapter?.NuqsAdapter
   if (Adapter) {
     const Wrapped = () => (
@@ -55,15 +57,12 @@ const OrdersPage = lazy(async () => {
     import('orders/NuqsAdapter').catch(() => undefined),
   ])
 
-  
-
   const page = pageModule.status === 'fulfilled' ? pageModule.value : null
   const adapter = adapterModule && adapterModule.status === 'fulfilled' ? adapterModule.value : null
 
   const resolved = resolveRemoteDefault(page ?? {}, ['OrdersPage', 'OrdersPageHost', 'OrdersApp'])
   const Component = resolved.default
 
-  // Prefer the host's NuqsAdapter (ensures adapter context comes from host-installed nuqs)
   const Adapter = HostNuqsAdapter ?? adapter?.NuqsAdapter
   if (Adapter) {
     const Wrapped = () => (
@@ -111,6 +110,35 @@ function HomePage() {
   )
 }
 
+function AuthNav() {
+  const [useAuthHook, setUseAuthHook] = useState<any>(null)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    ;(async () => {
+      const m = await import('auth/useAuth')
+      setUseAuthHook(() => m.useAuth ?? m.default)
+      setReady(true)
+    })()
+  }, [])
+
+  if (!ready) {
+    return (
+      <Link to="/login" className="text-sm font-medium hover:text-primary transition-colors">
+        Entrar
+      </Link>
+    )
+  }
+
+  const { isAuthenticated } = useAuthHook()
+  if (isAuthenticated()) return <UserMenu />
+  return (
+    <Link to="/login" className="text-sm font-medium hover:text-primary transition-colors">
+      Entrar
+    </Link>
+  )
+}
+
 function App() {
   const [AuthProvider, setAuthProvider] = useState<any>(null)
 
@@ -153,12 +181,7 @@ function App() {
                 >
                   Pedidos
                 </Link>
-                <Link
-                  to="/login"
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                >
-                  Entrar
-                </Link>
+                <AuthNav />
               </div>
             </nav>
           </header>
