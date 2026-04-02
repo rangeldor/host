@@ -20,15 +20,10 @@ const SignupPage = lazy(() =>
     .then((m) => resolveRemoteDefault(m, ['SignupPage', 'SignupPageHost', 'AuthApp']))
 )
 
-const UserMenu = lazy(() =>
-  import('auth/UserMenu')
-    .then((m) => ({ default: m.UserMenu ?? m.default }))
+const AuthNav = lazy(() =>
+  import('auth/AuthNav')
+    .then((m) => ({ default: m.AuthNav ?? m.default }))
 )
-
-const useAuth = lazy(async () => {
-  const m = await import('auth/useAuth')
-  return { default: m.useAuth ?? m.default }
-})
 
 const ProductsPage = lazy(async () => {
   const [pageModule, adapterModule] = await Promise.allSettled([
@@ -112,27 +107,6 @@ function HomePage() {
         </div>
       </div>
     </div>
-  )
-}
-
-function AuthNav() {
-  const [useAuthHook, setUseAuthHook] = useState<() => { user: any }>(() => () => ({ user: null }))
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    ;(async () => {
-      const m = await import('auth/useAuth')
-      setUseAuthHook(() => m.useAuth ?? m.default)
-      setReady(true)
-    })()
-  }, [])
-
-  const { user } = useAuthHook()
-  if (ready && user) return <UserMenu />
-  return (
-    <Link to="/login" className="text-sm font-medium hover:text-primary transition-colors">
-      Entrar
-    </Link>
   )
 }
 
