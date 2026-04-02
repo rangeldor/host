@@ -25,6 +25,11 @@ const UserMenu = lazy(() =>
     .then((m) => ({ default: m.UserMenu ?? m.default }))
 )
 
+const useAuth = lazy(async () => {
+  const m = await import('auth/useAuth')
+  return { default: m.useAuth ?? m.default }
+})
+
 const ProductsPage = lazy(async () => {
   const [pageModule, adapterModule] = await Promise.allSettled([
     import('products/ProductsPage'),
@@ -111,7 +116,7 @@ function HomePage() {
 }
 
 function AuthNav() {
-  const [useAuthHook, setUseAuthHook] = useState<any>(null)
+  const [useAuthHook, setUseAuthHook] = useState<() => { user: any }>(() => () => ({ user: null }))
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -122,16 +127,8 @@ function AuthNav() {
     })()
   }, [])
 
-  if (!ready) {
-    return (
-      <Link to="/login" className="text-sm font-medium hover:text-primary transition-colors">
-        Entrar
-      </Link>
-    )
-  }
-
-  const { isAuthenticated } = useAuthHook()
-  if (isAuthenticated()) return <UserMenu />
+  const { user } = useAuthHook()
+  if (ready && user) return <UserMenu />
   return (
     <Link to="/login" className="text-sm font-medium hover:text-primary transition-colors">
       Entrar
