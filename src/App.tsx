@@ -1,13 +1,11 @@
-import { lazy, Suspense } from 'react'
-// Prefer host-provided NuqsAdapter so adapter context comes from the host's nuqs instance
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { NuqsAdapter as HostNuqsAdapter } from 'nuqs/adapters/react-router/v6'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './queryClient'
 import OrdersWrapper from './OrdersWrapper'
 
-// Helper: inspect remote module and pick a usable component export.
-const resolveRemoteDefault = (m, candidates = []) => {
+const resolveRemoteDefault = (m: any, candidates: string[] = []) => {
   const found = m.default ?? candidates.map((c) => m[c]).find(Boolean)
   return { default: found }
 }
@@ -15,17 +13,11 @@ const resolveRemoteDefault = (m, candidates = []) => {
 const LoginPage = lazy(() =>
   import('auth/LoginPage')
     .then((m) => resolveRemoteDefault(m, ['LoginPage', 'LoginPageHost', 'AuthApp']))
-    .catch((e) => {
-      throw e
-    })
 )
 
 const SignupPage = lazy(() =>
   import('auth/SignupPage')
     .then((m) => resolveRemoteDefault(m, ['SignupPage', 'SignupPageHost', 'AuthApp']))
-    .catch((e) => {
-      throw e
-    })
 )
 
 const ProductsPage = lazy(async () => {
@@ -120,73 +112,80 @@ function HomePage() {
 }
 
 function App() {
-  return (
-    <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
-        <header className="border-b bg-background">
-          <nav className="container mx-auto flex items-center justify-between py-4 px-4">
-            <Link to="/" className="font-bold text-xl">
-              MFE App
-            </Link>
-            <div className="flex gap-4">
-              <Link
-                to="/produtos"
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                Produtos
-              </Link>
-              <Link
-                to="/pedidos"
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                Pedidos
-              </Link>
-              <Link
-                to="/login"
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                Entrar
-              </Link>
-            </div>
-          </nav>
-        </header>
-        <main className="flex-1">
-          <Suspense fallback={<SkeletonFallback />}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route
-                path="/login"
-                element={
-                  <QueryClientProvider client={queryClient}>
-                    <LoginPage />
-                  </QueryClientProvider>
-                }
-              />
-              <Route
-                path="/signup"
-                element={
-                  <QueryClientProvider client={queryClient}>
-                    <SignupPage />
-                  </QueryClientProvider>
-                }
-              />
-              <Route
-                path="/produtos/*"
-                element={
-                  <QueryClientProvider client={queryClient}>
-                    <ProductsPage />
-                  </QueryClientProvider>
-                }
-              />
-              <Route path="/pedidos/*" element={<OrdersWrapper />} />
-            </Routes>
-          </Suspense>
-        </main>
-        <footer className="border-t py-4 text-center text-sm text-muted-foreground">
-          MFE Host © 2026
-        </footer>
+  const [AuthProvider, setAuthProvider] = useState<any>(null)
+
+  useEffect(() => {
+    import('auth/AuthProvider')
+      .then((m) => {
+        const Provider = m.AuthProvider ?? m.default
+        if (Provider) setAuthProvider(() => Provider)
+      })
+      .catch(() => {})
+  }, [])
+
+  if (!AuthProvider) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-64 h-8 bg-muted animate-pulse rounded" />
       </div>
-    </BrowserRouter>
+    )
+  }
+
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <div className="min-h-screen flex flex-col">
+          <header className="border-b bg-background">
+            <nav className="container mx-auto flex items-center justify-between py-4 px-4">
+              <Link to="/" className="font-bold text-xl">
+                MFE App
+              </Link>
+              <div className="flex gap-4">
+                <Link
+                  to="/produtos"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Produtos
+                </Link>
+                <Link
+                  to="/pedidos"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Pedidos
+                </Link>
+                <Link
+                  to="/login"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Entrar
+                </Link>
+              </div>
+            </nav>
+          </header>
+          <main className="flex-1">
+            <Suspense fallback={<SkeletonFallback />}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route
+                  path="/produtos/*"
+                  element={
+                    <QueryClientProvider client={queryClient}>
+                      <ProductsPage />
+                    </QueryClientProvider>
+                  }
+                />
+                <Route path="/pedidos/*" element={<OrdersWrapper />} />
+              </Routes>
+            </Suspense>
+          </main>
+          <footer className="border-t py-4 text-center text-sm text-muted-foreground">
+            MFE Host © 2026
+          </footer>
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 
