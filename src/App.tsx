@@ -5,13 +5,21 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './queryClient'
 import OrdersWrapper from './OrdersWrapper'
 
-const toDefault = (m: any) => ({ default: m.default ?? m })
+const resolveComponent = (m: any, candidates: string[]) => {
+  const found = m.default ?? candidates.map((c) => m[c]).find(Boolean)
+  return { default: found }
+}
 
-const LoginPage = lazy(() => import('auth/LoginPage').then(toDefault))
-const SignupPage = lazy(() => import('auth/SignupPage').then(toDefault))
+const LoginPage = lazy(() =>
+  import('auth/LoginPage').then((m) => resolveComponent(m, ['LoginPage', 'LoginPageHost', 'AuthApp']))
+)
+
+const SignupPage = lazy(() =>
+  import('auth/SignupPage').then((m) => resolveComponent(m, ['SignupPage', 'SignupPageHost', 'AuthApp']))
+)
 
 const AuthNav = lazy(() =>
-  import('auth/AuthNav').then((m) => ({ default: m.default ?? m.AuthNav }))
+  import('auth/AuthNav').then((m) => resolveComponent(m, ['AuthNav']))
 )
 
 const ProductsPage = lazy(async () => {
@@ -23,7 +31,7 @@ const ProductsPage = lazy(async () => {
   const page = pageModule.status === 'fulfilled' ? pageModule.value : null
   const adapter = adapterModule && adapterModule.status === 'fulfilled' ? adapterModule.value : null
 
-  const Component = page?.default ?? page?.ProductsPage ?? page?.ProductsPageHost ?? page?.ProductsApp
+  const Component = resolveComponent(page ?? {}, ['ProductsPage', 'ProductsPageHost', 'ProductsApp']).default
   const Adapter = HostNuqsAdapter ?? adapter?.NuqsAdapter
 
   if (Adapter && Component) {
@@ -47,7 +55,7 @@ const OrdersPage = lazy(async () => {
   const page = pageModule.status === 'fulfilled' ? pageModule.value : null
   const adapter = adapterModule && adapterModule.status === 'fulfilled' ? adapterModule.value : null
 
-  const Component = page?.default ?? page?.OrdersPage ?? page?.OrdersPageHost ?? page?.OrdersApp
+  const Component = resolveComponent(page ?? {}, ['OrdersPage', 'OrdersPageHost', 'OrdersApp']).default
   const Adapter = HostNuqsAdapter ?? adapter?.NuqsAdapter
 
   if (Adapter && Component) {
