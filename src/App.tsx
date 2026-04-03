@@ -5,8 +5,10 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './queryClient'
 import OrdersWrapper from './OrdersWrapper'
 
-const LoginPage = lazy(() => import('auth/LoginPage'))
-const SignupPage = lazy(() => import('auth/SignupPage'))
+const toDefault = (m: any) => ({ default: m.default ?? m })
+
+const LoginPage = lazy(() => import('auth/LoginPage').then(toDefault))
+const SignupPage = lazy(() => import('auth/SignupPage').then(toDefault))
 
 const AuthNav = lazy(() =>
   import('auth/AuthNav').then((m) => ({ default: m.default ?? m.AuthNav }))
