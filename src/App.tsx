@@ -21,31 +21,9 @@ const ProductsPage = lazy(async () => {
   const Component = page?.default
   const Adapter = HostNuqsAdapter ?? adapter?.NuqsAdapter
 
-  if (Adapter && Component) {
-    const Wrapped = () => (
-      <Adapter>
-        <Component />
-      </Adapter>
-    )
-    return { default: Wrapped }
-  }
+  if (!Component) throw new Error('ProductsPage not found')
 
-  return { default: Component }
-})
-
-const OrdersPage = lazy(async () => {
-  const [pageModule, adapterModule] = await Promise.allSettled([
-    import('orders/OrdersPage'),
-    import('orders/NuqsAdapter').catch(() => undefined),
-  ])
-
-  const page = pageModule.status === 'fulfilled' ? pageModule.value : null
-  const adapter = adapterModule && adapterModule.status === 'fulfilled' ? adapterModule.value : null
-
-  const Component = page?.default
-  const Adapter = HostNuqsAdapter ?? adapter?.NuqsAdapter
-
-  if (Adapter && Component) {
+  if (Adapter) {
     const Wrapped = () => (
       <Adapter>
         <Component />
