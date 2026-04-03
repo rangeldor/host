@@ -22,6 +22,11 @@ declare module 'auth/AuthNav' {
   export default AuthNav
 }
 
+declare module 'auth/authActions' {
+  export function invalidateAuth(): void
+  export function logout(): void
+}
+
 declare module 'auth/ProtectedRoute' {
   import type { ComponentType, ReactNode } from 'react'
   const ProtectedRoute: ComponentType<{ children: ReactNode; fallbackUrl?: string }>
