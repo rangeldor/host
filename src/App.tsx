@@ -5,24 +5,11 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './queryClient'
 import OrdersWrapper from './OrdersWrapper'
 
-const resolveRemoteDefault = (m: any, candidates: string[] = []) => {
-  const found = m.default ?? candidates.map((c) => m[c]).find(Boolean)
-  return { default: found }
-}
+const LoginPage = lazy(() => import('auth/LoginPage'))
+const SignupPage = lazy(() => import('auth/SignupPage'))
 
-const LoginPage = lazy<any>(() =>
-  import('auth/LoginPage')
-    .then((m) => resolveRemoteDefault(m, ['LoginPage', 'LoginPageHost', 'AuthApp']))
-)
-
-const SignupPage = lazy<any>(() =>
-  import('auth/SignupPage')
-    .then((m) => resolveRemoteDefault(m, ['SignupPage', 'SignupPageHost', 'AuthApp']))
-)
-
-const AuthNav = lazy<any>(() =>
-  import('auth/AuthNav')
-    .then((m) => ({ default: (m as any).AuthNav ?? m.default }))
+const AuthNav = lazy(() =>
+  import('auth/AuthNav').then((m) => ({ default: m.default ?? m.AuthNav }))
 )
 
 const ProductsPage = lazy(async () => {
@@ -34,14 +21,12 @@ const ProductsPage = lazy(async () => {
   const page = pageModule.status === 'fulfilled' ? pageModule.value : null
   const adapter = adapterModule && adapterModule.status === 'fulfilled' ? adapterModule.value : null
 
-  const resolved = resolveRemoteDefault(page ?? {}, ['ProductsPage', 'ProductsPageHost', 'ProductsApp'])
-  const Component = resolved.default
-
+  const Component = page?.default ?? page?.ProductsPage ?? page?.ProductsPageHost ?? page?.ProductsApp
   const Adapter = HostNuqsAdapter ?? adapter?.NuqsAdapter
-  if (Adapter) {
+
+  if (Adapter && Component) {
     const Wrapped = () => (
       <Adapter>
-        {/* @ts-ignore */}
         <Component />
       </Adapter>
     )
@@ -60,14 +45,12 @@ const OrdersPage = lazy(async () => {
   const page = pageModule.status === 'fulfilled' ? pageModule.value : null
   const adapter = adapterModule && adapterModule.status === 'fulfilled' ? adapterModule.value : null
 
-  const resolved = resolveRemoteDefault(page ?? {}, ['OrdersPage', 'OrdersPageHost', 'OrdersApp'])
-  const Component = resolved.default
-
+  const Component = page?.default ?? page?.OrdersPage ?? page?.OrdersPageHost ?? page?.OrdersApp
   const Adapter = HostNuqsAdapter ?? adapter?.NuqsAdapter
-  if (Adapter) {
+
+  if (Adapter && Component) {
     const Wrapped = () => (
       <Adapter>
-        {/* @ts-ignore */}
         <Component />
       </Adapter>
     )
