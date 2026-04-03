@@ -16,6 +16,12 @@ declare module 'auth/SignupPage' {
   export default SignupPage
 }
 
+declare module 'auth/AuthNav' {
+  import type { ComponentType } from 'react'
+  const AuthNav: ComponentType
+  export default AuthNav
+}
+
 declare module 'auth/ProtectedRoute' {
   import type { ComponentType, ReactNode } from 'react'
   const ProtectedRoute: ComponentType<{ children: ReactNode; fallbackUrl?: string }>
@@ -46,6 +52,18 @@ declare module 'auth/routes' {
   export const authRoutes: RouteObject[]
 }
 
+declare module 'products/ProductsPage' {
+  import type { ComponentType } from 'react'
+  const ProductsPage: ComponentType
+  export default ProductsPage
+}
+
+declare module 'products/NuqsAdapter' {
+  import type { ComponentType } from 'react'
+  const NuqsAdapter: ComponentType<{ children: React.ReactNode }>
+  export { NuqsAdapter }
+}
+
 declare module 'products/ProductList' {
   import type { ComponentType } from 'react'
   const ProductList: ComponentType
@@ -62,6 +80,18 @@ declare module 'products/ProductDetail' {
   import type { ComponentType } from 'react'
   const ProductDetail: ComponentType
   export default ProductDetail
+}
+
+declare module 'orders/OrdersPage' {
+  import type { ComponentType } from 'react'
+  const OrdersPage: ComponentType
+  export default OrdersPage
+}
+
+declare module 'orders/NuqsAdapter' {
+  import type { ComponentType } from 'react'
+  const NuqsAdapter: ComponentType<{ children: React.ReactNode }>
+  export { NuqsAdapter }
 }
 
 declare module 'orders/OrderList' {
