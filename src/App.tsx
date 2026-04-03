@@ -10,19 +10,19 @@ const resolveRemoteDefault = (m: any, candidates: string[] = []) => {
   return { default: found }
 }
 
-const LoginPage = lazy(() =>
+const LoginPage = lazy<any>(() =>
   import('auth/LoginPage')
     .then((m) => resolveRemoteDefault(m, ['LoginPage', 'LoginPageHost', 'AuthApp']))
 )
 
-const SignupPage = lazy(() =>
+const SignupPage = lazy<any>(() =>
   import('auth/SignupPage')
     .then((m) => resolveRemoteDefault(m, ['SignupPage', 'SignupPageHost', 'AuthApp']))
 )
 
-const AuthNav = lazy(() =>
+const AuthNav = lazy<any>(() =>
   import('auth/AuthNav')
-    .then((m) => ({ default: m.AuthNav ?? m.default }))
+    .then((m) => ({ default: (m as any).AuthNav ?? m.default }))
 )
 
 const ProductsPage = lazy(async () => {
