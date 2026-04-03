@@ -19,7 +19,7 @@ declare module 'auth/SignupPage' {
 declare module 'auth/AuthNav' {
   import type { ComponentType } from 'react'
   const AuthNav: ComponentType
-  export default AuthNav
+  export = AuthNav
 }
 
 declare module 'auth/ProtectedRoute' {

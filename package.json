@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@rangeldor/cindle-design-system": "latest",
+    "@tanstack/react-query": "^5.0.0",
     "clsx": "^2.1.0",
     "nuqs": "^2.8.9",
     "react": "^18.3.1",
